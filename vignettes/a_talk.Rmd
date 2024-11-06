@@ -1,5 +1,5 @@
 ---
-title: "A. How Bioconductor Advances Science"
+title: "A. Como utilizar o consexpressionR - comandos R"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A. How Bioconductor Advances Science}
