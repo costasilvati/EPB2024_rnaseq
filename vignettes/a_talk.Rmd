@@ -1,0 +1,58 @@
+---
+title: "A. How Bioconductor Advances Science"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A. How Bioconductor Advances Science}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Para utilizar o consexpressionR é necessário realizar a sua instalação. O pacote está temporariamente hospedado no github.
+
+Os comandos para instalação necessitam da biblioteca [*devtools*](https://devtools.r-lib.org).
+
+```{r message=FALSE}
+library(devtools)
+install_github("costasilvati/consexpressionR")
+library(consexpressionR)
+
+```
+
+Por padrão o consexpressionR possui um conjunto de dados para testes, este conjunto de dados é um objeto R data.frame, contendo parte da tabela de contagem do conjunto original disponível no GEO, pelo acesso [GSE95077](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE95077).
+
+Você pode utiliza-lo digitando apenas o nome do data.frame: *gse95077*. 
+
+Para executar a análise de expressão diferencial de genes com os 7 pacotes R implelementados no consexpressionR utilize os seguintes comandos no Console R.
+
+```{r}
+library(cqn)
+cons_result <- runExpression(numberReplics = 3,
+                              groupName = c("BM", "JJ"),
+                              rDataFrameCount = gse95077,
+                              sepCharacter = ",",
+                              experimentName = "test_cons",
+                              outDirPath = "" ,
+                              printResults = TRUE)
+
+```
+
+Para definir os genes diferencialemente identificados por cada ferramenta:
+```{r}
+expDef_result <- expressionDefinition(resultTool = cons_result, printResults = TRUE)
+```
+
+<!-- Bioinformatic researchers contribute to science through development of
+innovative methods, and through application of established methods to
+understand data they and their collaborators generate. *Bioconductor*
+(https://bioconductor.org) plays an essential role, providing a
+way for researchers to share their scientific contributions with a
+wide audience while encouraging many 'best practices' in software
+development, dissemination, and use. But science and technology change
+quickly. This talk addresses how *R* / *Bioconductor* adapts to
+challenges like single-cell and spatial genomics, multi-omics, using
+*R* with other software languages, containerization, and cloud
+computing initiatives. -->
+
+[Slides are available][slides].
+
+[slides]: https://bit.ly/3PbX03F

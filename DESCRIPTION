@@ -1,0 +1,36 @@
+Package: EPB2024_rnaseq
+Title: Apresentação e Material sobre Expressão Diferencial de Genes
+Version: 0.0.1.1
+Authors@R: c(
+    person(
+        "Juliana", "Costa-Silva",
+        email = "julianacostasilvati@gmail.com",
+        role = c("aut", "cre"),
+        comment = c(ORCID = "0000-0002-5830-8548")
+    ))
+Description: Este pacote *R* inclui o material apresentado na Escola Paranaense 
+de Bioinformática, realizada em Londrina Paraná,
+de 6 a 8 de novembro de 2024 <https://www.even3.com.br/epbioinfo2024/>. 
+Me. Juliana Costa Silva conduziu um mini-curso sobre 
+Análise de Expressão Diferencial de Genes com Dados de RNA-Seq, onde foram apresentadas
+os principais passos da análise, algumas metodlogias para análise de expressão 
+com a linguagem R e uma sessão prática de análise de expressão diferencial de 
+genes com análise de resultados.
+License: Artistic-2.0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+    dplyr, jsonlite, rjsoncons, cellxgenedp, curl
+Suggests: 
+    knitr, rmarkdown, pkgdown,
+    readr, ggplot2, plotly,
+    AnnotationHub, ensembldb,
+    Seurat, SingleCellExperiment, zellkonverter,
+    DropletTestFiles, DropletUtils, scater, EnsDb.Hsapiens.v86, scran, celldex,
+    scuttle, SingleR,
+    MouseGastrulationData, batchelor, igraph,
+    BiocFileCache, tidyr
+VignetteBuilder: knitr
+URL: https://costasilvati.github.io/EPB_2024_rnaseq
+BugReports: https://github.com/costasilvati/EPB_2024_rnaseq/issues

@@ -1,0 +1,212 @@
+---
+title: "F. Annotating cell types in Bioconductor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{F. Annotating cell types in Bioconductor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Orchestrating Single-Cell Analysis with _Bioconductor_
+
+[OSCA][] -- an amazing resource!
+
+[OSCA]: https://bioconductor.org/books/OSCA
+
+# Annotating cell types
+
+This script is derived from the [OSCA Basic][OSCA-B] book, [Chapter
+7][OSCA-B-7]: Cell type annotation. See the book for full details.
+
+```{r, echo = FALSE, message = FALSE}
+library(DropletTestFiles)
+library(DropletUtils)
+library(scater)
+library(EnsDb.Hsapiens.v86)
+library(scran)
+library(celldex)
+library(SingleR)
+```
+
+## Initial analysis
+
+We start by retrieving some sample DropSeq data.
+
+```{r}
+library(DropletTestFiles)
+raw.path <- getTestFile("tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz")
+out.path <- file.path(tempdir(), "pbmc4k")
+untar(raw.path, exdir=out.path)
+```
+
+Input the data using DropSeqUtils
+
+```{r}
+library(DropletUtils)
+fname <- file.path(out.path, "raw_gene_bc_matrices/GRCh38")
+sce.pbmc <- read10xCounts(fname, col.names=TRUE)
+```
+
+We lightly 'annotate' the data by making sure that feature names are
+unique
+
+```{r}
+library(scater)
+rownames(sce.pbmc) <- uniquifyFeatureNames(
+    rowData(sce.pbmc)$ID, rowData(sce.pbmc)$Symbol
+)
+```
+
+As a quality control step, check for and remove empty droplets.
+
+```{r}
+set.seed(100)
+e.out <- emptyDrops(counts(sce.pbmc))
+sce.pbmc <- sce.pbmc[, which(e.out$FDR <= 0.001)]
+```
+
+Normalize cell counts by clustering cells and computing scale factors
+per cluster. Update the dataset to include log counts
+
+```{r}
+library(scran)
+set.seed(1000)
+clusters <- quickCluster(sce.pbmc)
+sce.pbmc <- computeSumFactors(sce.pbmc, cluster=clusters)
+sce.pbmc <- logNormCounts(sce.pbmc)
+```
+
+Variance modeling fits a statistical model to the count data; this is
+used to identify 'highly variable' genes.
+
+```{r}
+set.seed(1001)
+dec.pbmc <- modelGeneVarByPoisson(sce.pbmc)
+top.pbmc <- getTopHVGs(dec.pbmc, prop=0.1)
+```
+
+Calculate reduced-dimensionality representations of the
+data. `denoisePCA()` removes technical noise from log-normalized
+counts. Technical noise, in contrast to 'biological' signal, is
+variation between cells that is uncorrelated across genes. Removing
+technical noise improves resolution in subsequent dimensionality
+reduction steps. tSNE and UMAP are two common methods for reducing the
+genes x samples data to two or a few dimensions for visual
+exploration. Generally, UMAP is less sensitive to parameter choice and
+random number seed.
+
+```{r}
+set.seed(10000)
+sce.pbmc <- denoisePCA(sce.pbmc, subset.row=top.pbmc, technical=dec.pbmc)
+
+set.seed(100000)
+sce.pbmc <- runTSNE(sce.pbmc, dimred="PCA")
+
+set.seed(1000000)
+sce.pbmc <- runUMAP(sce.pbmc, dimred="PCA")
+```
+
+At this stage we can visualize our data, e.g., as a UMAP, but are not
+yet able to annotate cell types.
+
+```{r}
+library(ggplot2)
+umap <-
+    reducedDim(sce.pbmc, type = "UMAP") |>
+    dplyr::as_tibble(rownames = "cell_id")
+ggplot(umap) +
+    aes(UMAP1, UMAP2) +
+    geom_point()
+```
+
+Perform shared nearest-neighbor clustering (`buildSNNGraph()`). These
+nearest neighbors are then used in community detection algorithms
+(`cluster_walktrap()`) to find similar cells. This represents a faster
+approach than more traditional hierarchical clustering.
+
+```{r}
+g <- buildSNNGraph(sce.pbmc, k=10, use.dimred = 'PCA')
+clust <- igraph::cluster_walktrap(g)$membership
+colLabels(sce.pbmc) <- factor(clust)
+```
+
+## Using curated reference data
+
+One approach to cell annotation is to compare expression profiles to a
+curated reference data set. We use the reference data derived from
+Blueprint and ENCODE data; see `browseVignettes("celldex")` for a
+description of this and other reference datasets.
+
+```{r}
+ref <- celldex::BlueprintEncodeData()
+colData(ref) |>
+    dplyr::as_tibble()
+colData(ref) |>
+    dplyr::as_tibble() |>
+    dplyr::count(label.main, sort = TRUE)
+```
+
+Annotate our data using the 'main' label for cell type
+
+```{r, warning = FALSE}
+library(SingleR)
+## assign each cell in sce.pbmc to a type
+pred <- SingleR(test=sce.pbmc, ref=ref, labels=ref$label.main)
+pred |>
+    dplyr::as_tibble(rownames = "cell_id")
+pred |>
+    dplyr::as_tibble() |>
+    dplyr::count(labels)
+```
+
+We can now color our UMAP with predicted cell types.
+
+```{r}
+umap_label <-
+    umap |>
+    dplyr::mutate(cell_type = pred$labels)
+ggplot(umap_label) +
+    aes(UMAP1, UMAP2, color = cell_type) +
+    geom_point()
+```
+
+Finaly, visualize the cell annotation. Generally, B-cells and
+Monocytes are well-annotated, e.g., cells labelled 'B-cells' have a
+strong (yellow) signal only under the B-cell label; CD4+ and CD8+
+cells less well-anotated. It is interesting to explore biological
+reasons that might contribute to this weaker classification.
+
+```{r}
+plotScoreHeatmap(pred)
+```
+
+## Other strategies
+
+Other strategies ouline in [Chapter 7][OSCA-B-7]
+
+- Custom references
+- Gene sets
+- Markers
+
+[OSCA-B]: https://bioconductor.org/books/OSCA.basic
+[OSCA-B-7]: https://bioconductor.org/books/release/OSCA.basic/cell-type-annotation.html
+
+# Session information
+
+This document was produced with the following *R* software:
+
+```{r session_info}
+sessionInfo()
+```
+
+```{r include = FALSE}
+## clean up .GlobalEnv at end of vignette
+rm(list = ls(envir = .GlobalEnv, all.names = TRUE), envir = .GlobalEnv)
+```

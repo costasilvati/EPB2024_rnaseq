@@ -1,0 +1,13 @@
+url: https://costasilvati.github.io/EPB2024_rnaseq
+home:
+  title: "Apresentação e Material sobre Expressão Diferencial de Genes"
+  type: inverse
+navbar:
+  right:
+   - icon: fa-github
+     href: https://github.com/costasilvati/EPB2024_rnaseq
+template:
+  bootstrap: 5
+  params:
+    bootswatch: flatly
+
