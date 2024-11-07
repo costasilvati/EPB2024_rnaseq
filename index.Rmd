@@ -6,7 +6,7 @@ output:
   pdf_document: 
     latex_engine: xelatex
 ---
-# EPB2024 -- Escola Paranaense de Bioinformática
+
 
 Este documento está localizado no repositótio
 [https://costasilvati.github.io/EPB_2024_rnaseq](https://costasilvati.github.io/EPB_2024_rnaseq)
