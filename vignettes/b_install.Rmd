@@ -1,0 +1,38 @@
+---
+title: "C. Instalações necessárias"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A. How Bioconductor Advances Science}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+# Instalações de dependencias consexpressionR
+
+Como o consexpressionR executa várias análises em um único experimento, faz-se necessário algumas instruções que podem facilitar a instalação.
+
+O consexpression utiliza R na versão 4.4.0 ou posteriores.
+
+## Instruções Gerais
+
+ - Instale a [versão mais atualizada do R](https://www.r-project.org/);
+ - Instale o kit de ferramentas R para compilar pacotes, ente outras funcionalidades:  [RTools](https://cran.r-project.org/bin/windows/Rtools/);
+ 
+ 
+No console R execute o comando de instalação das dependências do repositório  [Bioconductor](https://bioconductor.org/).
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, prompt=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(pkgs = c('cqn',
+                              'DESeq2', 
+                              'EBSeq', 
+                              'edgeR', 
+                              'KnowSeq', 
+                              'limma', 
+                              'NOISeq', 
+                              'tximport',
+                              'impute'),
+                     force = TRUE)
+```

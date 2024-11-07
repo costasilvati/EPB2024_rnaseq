@@ -17,7 +17,8 @@ Escola Paranaense de Bioinformática, realizada em Londrina Paraná,
 de 6 a 8 de novembro de 2024. Me. Juliana Costa Silva conduziu um mini-curso sobre 
 *Análise de Expressão Diferencial de Genes com Dados de RNA-Seq*.
 
-- [A. Como *consexpression* funciona][A]
+- [Como utilizar o *consexpressionR*][A]
+- [Guia de instalações][B]
 
 Este minicurso demonstra a utilização do pacote 
 [consexpressionR](https://github.com/costasilvati/consexpressionR/). 
@@ -30,6 +31,7 @@ Estas análises utilizam um conjunto de dados disponível no acesso
 - [C. R / Bioconductor for Genomic Analysis][C]
 -->
 [A]: vignettes/a_talk.html
+[B]: vignettes/b_install.html
 <!-- 
 [B]: articles/b_course_part_1.html
 [C]: articles/c_course_part_2.html

@@ -1,5 +1,5 @@
 ---
-title: "A. Como utilizar o consexpressionR - comandos R"
+title: "Como utilizar o consexpressionR - comandos R"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A. How Bioconductor Advances Science}
@@ -11,9 +11,12 @@ Para utilizar o consexpressionR é necessário realizar a sua instalação. O pa
 
 Os comandos para instalação necessitam da biblioteca [*devtools*](https://devtools.r-lib.org).
 
-```{r message=FALSE}
+```{r, warning=FALSE, message=FALSE} 
+library(cqn)
 library(devtools)
-install_github("costasilvati/consexpressionR")
+if (!require(consexpressionR)) {
+    install_github("costasilvati/consexpressionR")
+  }
 library(consexpressionR)
 
 ```
@@ -24,22 +27,40 @@ Você pode utiliza-lo digitando apenas o nome do data.frame: *gse95077*.
 
 Para executar a análise de expressão diferencial de genes com os 7 pacotes R implelementados no consexpressionR utilize os seguintes comandos no Console R.
 
-```{r}
-library(cqn)
+```{r eval=FALSE, message=FALSE, warning=FALSE, prompt=FALSE}
+
 cons_result <- runExpression(numberReplics = 3,
                               groupName = c("BM", "JJ"),
                               rDataFrameCount = gse95077,
                               sepCharacter = ",",
                               experimentName = "test_cons",
-                              outDirPath = "" ,
+                              outDirPath = "E:/GitHubRepositorios/" ,
                               printResults = TRUE)
 
 ```
 
+A função runExpression() executa 7 pacotes R para análise de expressão diferencial de genes. Como resultado gera um .csv por pacote R executado. 
+
+Se o parâmetro *printReults* estiver com valor TRUE, devem ser informado um caminho para a escrita dos  arquivos de saída. Estes serão escritos na pasta onde foi realizada a execução (se outDirPrath=""), ou no caminho informado em outDirPath (ex.:outDirPath = "E:/GitHubRepositorios/").
+
 Para definir os genes diferencialemente identificados por cada ferramenta:
-```{r}
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, prompt=FALSE}
 expDef_result <- expressionDefinition(resultTool = cons_result, printResults = TRUE)
+
 ```
+
+A função expressionDefinition() avalia os genes indicdos por cada pacote R, dentre os 7 executados. Como resultado gera um .csv por pacote R executado, todos os arquivos de saída são nomeados com DE.
+
+Par executar esta análise pelo navegador WEB (Chrome, Safari,Mozila, e outros) use o comando abaixo:
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, prompt=FALSE}
+library(consexpressionR)
+consexpressionR()
+```
+
+
+Este comando executa uma aplicação shiny, que realiza a mesma análise.
 
 <!-- Bioinformatic researchers contribute to science through development of
 innovative methods, and through application of established methods to
@@ -53,6 +74,6 @@ challenges like single-cell and spatial genomics, multi-omics, using
 *R* with other software languages, containerization, and cloud
 computing initiatives. -->
 
-[Slides are available][slides].
+<!--[Slides are available][slides].
 
-[slides]: https://bit.ly/3PbX03F
+[slides]: https://bit.ly/3PbX03F-->
