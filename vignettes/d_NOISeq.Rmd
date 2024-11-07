@@ -1,0 +1,130 @@
+---
+title: "Executando análise de expressão com métodos não paramétricos"
+author: "Juliana Costa-Silva"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{D. From CELLxGENE to R and Bioconductor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+# Utilizando *NOISeq* para avaliar expressão
+
+## Instalação e Carregamento do Pacote
+
+Primeiramente a instalação e carregamento do pacote via Bioconductor
+
+```{r, warning=FALSE, message=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("NOISeq")
+library(NOISeq)
+library(consexpressionR)
+```
+
+
+## Criação do Objeto de Dados
+
+Para executar a análise precisamos de um conjunto de dados, que contenha uma matriz de contagem, e um data.frame descrevendo o design do experimento.
+
+```{r, warning=FALSE, message=FALSE}
+#counts <- read.table("seus_dados_de_contagem.txt", header = TRUE, row.names = 1)
+design <- rep(c("BM","JJ"), each = 3)
+factors <- data.frame(condition = design)
+
+mydata <- readData(data = gse95077, factors = factors)
+```
+
+Agora podemos utilizar o objeto mydata para as análises.
+
+## Análise de Expressão Diferencial
+
+A análise de expressão diferencial de genes desenvolvida pelo NOISeq é realizada através da função noiseq(). Esta função possui alguns parâmetros.
+
+
+### Parâmetros da Função `noiseq`
+
+#### norm
+
+**Descrição**: Método de normalização a ser utilizado.
+
+ - Valores Possíveis: `"rpkm"`, `"uqua"`, `"tmm"`, `"n"`.
+
+ - Como Definir: Escolha o método de normalização com base na sua preferência ou no que é mais adequado para seus dados. Por exemplo, `"tmm"` (Trimmed Mean of M-values) é frequentemente usado para normalizar dados de RNA-seq.
+
+#### k
+
+**Descrição**: Valor a ser usado para substituir contagens iguais a 0.
+
+ - Valor Padrão: `0.5`.
+
+ - Como Definir: O valor padrão geralmente é adequado, mas você pode ajustá-lo se tiver razões específicas para usar um valor diferente.
+
+#### factor
+
+**Descrição**: Nome do fator cujos níveis são as condições a serem comparadas.
+
+ - Como Definir: Defina como uma string que corresponde ao nome da coluna no seu dataframe de fatores que contém as condições experimentais. Por exemplo, `"condition"`.
+
+#### lc
+
+**Descrição**: Correção de comprimento, feita dividindo a expressão pelo comprimento elevado a `lc`.
+
+ - Valor Padrão: `0`.
+
+ - Como Definir: Use o valor padrão se não precisar de correção de comprimento. Caso contrário, ajuste conforme necessário.
+
+#### replicates
+
+**Descrição**: Tipo de Replicatas a serem usados.
+
+ - Valores Possíveis: `"technical"`, `"biological"`, `"no"`.
+
+ - Como Definir: Escolha `"technical"` se você tiver replicatas técnicas, `"biological"` para replicatas biológicas, ou `"no"` se não tiver replicatas.
+
+#### conditions
+
+**Descrição**: Vetor contendo as duas condições a serem comparadas pelo algoritmo de expressão diferencial.
+
+ - Como Definir: Defina como um vetor de strings com os nomes das duas condições a serem comparadas, por exemplo, `c("grupo1", "grupo2")`. Este parâmetro é necessário quando o fator contém mais de duas condições diferentes.
+
+
+## replicatas Técnicas vs. Biológicas
+Definir o parâmetro `replicates` como `"technical"` no método `noiseq` altera a forma como o algoritmo trata os replicados em sua análise de expressão diferencial. Aqui está o que muda:
+
+
+
+### Replicatas Récnicas
+
+**Descrição**: São replicados obtidos a partir da mesma amostra biológica, mas processados separadamente para avaliar a variabilidade técnica do experimento.
+
+**Impacto na Análise**: Quando você define `replicates = "technical"`, o NOISeq considera que as diferenças observadas entre os replicados são devidas a variações técnicas e não biológicas. Isso pode resultar em uma menor variabilidade entre as amostras, levando a uma maior sensibilidade na detecção de genes diferencialmente expressos, pois o ruído técnico é minimizado.
+
+### Replicatas Biológicas
+
+**Descrição**: São replicados obtidos de amostras biológicas independentes, representando a variabilidade natural entre os indivíduos ou condições.
+
+**Impacto na Análise**: Com `replicates = "biological"`, o NOISeq considera a variabilidade biológica entre as amostras. Isso geralmente resulta em uma maior variabilidade total, refletindo as diferenças biológicas reais entre as condições experimentais.
+
+
+```{r, warning=FALSE, message=FALSE}
+results <- noiseq(mydata, k = 0.5, norm = "tmm", factor = "condition")
+```
+
+## Visualização dos Resultados
+
+```{r, warning=FALSE, message=FALSE}
+degenes <- degenes(results, q = 0.8, M = NULL)
+head(degenes)
+```
+```
+
+### Valores de Saída
+
+Os valores de saída da função `noiseq` do pacote NOISeq são:
+
+- **Controle_mean**: Média das contagens normalizadas para o grupo de controle.
+- **Tratado_mean**: Média das contagens normalizadas para o grupo tratado.
+- **M**: Log2 da razão das médias das contagens entre os grupos tratado e controle.
+- **D**: Divergência probabilística entre as distribuições das contagens nos grupos tratado e controle.
+- **prob**: Probabilidade de que o gene seja diferencialmente expresso.
+- **ranking**: Ranking dos genes com base na probabilidade de expressão diferencial.
