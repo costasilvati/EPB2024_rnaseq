@@ -37,7 +37,7 @@ Estas análises utilizam um conjunto de dados disponível no acesso
 [A]: vignettes/a_talk.html
 [B]: vignettes/b_install.html
 [C]: vignettes/c_edger.html
-[D]: vignettes/c_NOISeq.html
+[D]: vignettes/d_NOISeq.html
 <!-- 
 [B]: articles/b_course_part_1.html
 [C]: articles/c_course_part_2.html
