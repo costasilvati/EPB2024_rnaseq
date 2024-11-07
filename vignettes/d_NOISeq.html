@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Juliana Costa-Silva" />
+
+
+<title>Executando análise de expressão com métodos não paramétricos</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Executando análise de expressão com métodos
+não paramétricos</h1>
+<h4 class="author">Juliana Costa-Silva</h4>
+
+
+
+<div id="utilizando-noiseq-para-avaliar-expressão" class="section level1">
+<h1>Utilizando <em>NOISeq</em> para avaliar expressão</h1>
+<div id="instalação-e-carregamento-do-pacote" class="section level2">
+<h2>Instalação e Carregamento do Pacote</h2>
+<p>Primeiramente a instalação e carregamento do pacote via
+Bioconductor</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;NOISeq&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(NOISeq)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(consexpressionR)</span></code></pre></div>
+</div>
+<div id="criação-do-objeto-de-dados" class="section level2">
+<h2>Criação do Objeto de Dados</h2>
+<p>Para executar a análise precisamos de um conjunto de dados, que
+contenha uma matriz de contagem, e um data.frame descrevendo o design do
+experimento.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">#counts &lt;- read.table(&quot;seus_dados_de_contagem.txt&quot;, header = TRUE, row.names = 1)</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;BM&quot;</span>,<span class="st">&quot;JJ&quot;</span>), <span class="at">each =</span> <span class="dv">3</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>factors <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">condition =</span> design)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>mydata <span class="ot">&lt;-</span> <span class="fu">readData</span>(<span class="at">data =</span> gse95077, <span class="at">factors =</span> factors)</span></code></pre></div>
+<p>Agora podemos utilizar o objeto mydata para as análises.</p>
+</div>
+<div id="análise-de-expressão-diferencial" class="section level2">
+<h2>Análise de Expressão Diferencial</h2>
+<p>A análise de expressão diferencial de genes desenvolvida pelo NOISeq
+é realizada através da função noiseq(). Esta função possui alguns
+parâmetros.</p>
+<div id="parâmetros-da-função-noiseq" class="section level3">
+<h3>Parâmetros da Função <code>noiseq</code></h3>
+<div id="norm" class="section level4">
+<h4>norm</h4>
+<p><strong>Descrição</strong>: Método de normalização a ser
+utilizado.</p>
+<ul>
+<li><p>Valores Possíveis: <code>&quot;rpkm&quot;</code>, <code>&quot;uqua&quot;</code>,
+<code>&quot;tmm&quot;</code>, <code>&quot;n&quot;</code>.</p></li>
+<li><p>Como Definir: Escolha o método de normalização com base na sua
+preferência ou no que é mais adequado para seus dados. Por exemplo,
+<code>&quot;tmm&quot;</code> (Trimmed Mean of M-values) é frequentemente usado
+para normalizar dados de RNA-seq.</p></li>
+</ul>
+</div>
+<div id="k" class="section level4">
+<h4>k</h4>
+<p><strong>Descrição</strong>: Valor a ser usado para substituir
+contagens iguais a 0.</p>
+<ul>
+<li><p>Valor Padrão: <code>0.5</code>.</p></li>
+<li><p>Como Definir: O valor padrão geralmente é adequado, mas você pode
+ajustá-lo se tiver razões específicas para usar um valor
+diferente.</p></li>
+</ul>
+</div>
+<div id="factor" class="section level4">
+<h4>factor</h4>
+<p><strong>Descrição</strong>: Nome do fator cujos níveis são as
+condições a serem comparadas.</p>
+<ul>
+<li>Como Definir: Defina como uma string que corresponde ao nome da
+coluna no seu dataframe de fatores que contém as condições
+experimentais. Por exemplo, <code>&quot;condition&quot;</code>.</li>
+</ul>
+</div>
+<div id="lc" class="section level4">
+<h4>lc</h4>
+<p><strong>Descrição</strong>: Correção de comprimento, feita dividindo
+a expressão pelo comprimento elevado a <code>lc</code>.</p>
+<ul>
+<li><p>Valor Padrão: <code>0</code>.</p></li>
+<li><p>Como Definir: Use o valor padrão se não precisar de correção de
+comprimento. Caso contrário, ajuste conforme necessário.</p></li>
+</ul>
+</div>
+<div id="replicates" class="section level4">
+<h4>replicates</h4>
+<p><strong>Descrição</strong>: Tipo de Replicatas a serem usados.</p>
+<ul>
+<li><p>Valores Possíveis: <code>&quot;technical&quot;</code>,
+<code>&quot;biological&quot;</code>, <code>&quot;no&quot;</code>.</p></li>
+<li><p>Como Definir: Escolha <code>&quot;technical&quot;</code> se você tiver
+replicatas técnicas, <code>&quot;biological&quot;</code> para replicatas
+biológicas, ou <code>&quot;no&quot;</code> se não tiver replicatas.</p></li>
+</ul>
+</div>
+<div id="conditions" class="section level4">
+<h4>conditions</h4>
+<p><strong>Descrição</strong>: Vetor contendo as duas condições a serem
+comparadas pelo algoritmo de expressão diferencial.</p>
+<ul>
+<li>Como Definir: Defina como um vetor de strings com os nomes das duas
+condições a serem comparadas, por exemplo,
+<code>c(&quot;grupo1&quot;, &quot;grupo2&quot;)</code>. Este parâmetro é necessário quando o
+fator contém mais de duas condições diferentes.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="replicatas-técnicas-vs.-biológicas" class="section level2">
+<h2>replicatas Técnicas vs. Biológicas</h2>
+<p>Definir o parâmetro <code>replicates</code> como
+<code>&quot;technical&quot;</code> no método <code>noiseq</code> altera a forma
+como o algoritmo trata os replicados em sua análise de expressão
+diferencial. Aqui está o que muda:</p>
+<div id="replicatas-récnicas" class="section level3">
+<h3>Replicatas Récnicas</h3>
+<p><strong>Descrição</strong>: São replicados obtidos a partir da mesma
+amostra biológica, mas processados separadamente para avaliar a
+variabilidade técnica do experimento.</p>
+<p><strong>Impacto na Análise</strong>: Quando você define
+<code>replicates = &quot;technical&quot;</code>, o NOISeq considera que as
+diferenças observadas entre os replicados são devidas a variações
+técnicas e não biológicas. Isso pode resultar em uma menor variabilidade
+entre as amostras, levando a uma maior sensibilidade na detecção de
+genes diferencialmente expressos, pois o ruído técnico é minimizado.</p>
+</div>
+<div id="replicatas-biológicas" class="section level3">
+<h3>Replicatas Biológicas</h3>
+<p><strong>Descrição</strong>: São replicados obtidos de amostras
+biológicas independentes, representando a variabilidade natural entre os
+indivíduos ou condições.</p>
+<p><strong>Impacto na Análise</strong>: Com
+<code>replicates = &quot;biological&quot;</code>, o NOISeq considera a
+variabilidade biológica entre as amostras. Isso geralmente resulta em
+uma maior variabilidade total, refletindo as diferenças biológicas reais
+entre as condições experimentais.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">noiseq</span>(mydata, <span class="at">k =</span> <span class="fl">0.5</span>, <span class="at">norm =</span> <span class="st">&quot;tmm&quot;</span>, <span class="at">factor =</span> <span class="st">&quot;condition&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;Computing (M,D) values...&quot;
+## [1] &quot;Computing probability of differential expression...&quot;</code></pre>
+</div>
+</div>
+<div id="visualização-dos-resultados" class="section level2">
+<h2>Visualização dos Resultados</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>degenes <span class="ot">&lt;-</span> <span class="fu">degenes</span>(results, <span class="at">q =</span> <span class="fl">0.8</span>, <span class="at">M =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;19 differentially expressed features&quot;</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">head</span>(degenes)</span></code></pre></div>
+<pre><code>##                   BM_mean    JJ_mean         M         D      prob    ranking
+## ENSG00000168264  50941.90   9313.131  2.451515  41628.77 1.0000000   41628.77
+## ENSG00000065978  25282.93  64344.830 -1.347660  39061.90 1.0000000  -39061.90
+## ENSG00000105968  90319.04  18540.972  2.284313  71778.07 1.0000000   71778.07
+## ENSG00000105887 149049.73  24878.631  2.582815 124171.10 1.0000000  124171.10
+## ENSG00000075624  95526.46 502524.309 -2.395221 406997.85 1.0000000 -406997.85
+## ENSG00000115758  56239.69 114181.567 -1.021669  57941.87 0.9946237  -57941.87</code></pre>
+<p>```</p>
+<div id="valores-de-saída" class="section level3">
+<h3>Valores de Saída</h3>
+<p>Os valores de saída da função <code>noiseq</code> do pacote NOISeq
+são:</p>
+<ul>
+<li><strong>Controle_mean</strong>: Média das contagens normalizadas
+para o grupo de controle.</li>
+<li><strong>Tratado_mean</strong>: Média das contagens normalizadas para
+o grupo tratado.</li>
+<li><strong>M</strong>: Log2 da razão das médias das contagens entre os
+grupos tratado e controle.</li>
+<li><strong>D</strong>: Divergência probabilística entre as
+distribuições das contagens nos grupos tratado e controle.</li>
+<li><strong>prob</strong>: Probabilidade de que o gene seja
+diferencialmente expresso.</li>
+<li><strong>ranking</strong>: Ranking dos genes com base na
+probabilidade de expressão diferencial.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
