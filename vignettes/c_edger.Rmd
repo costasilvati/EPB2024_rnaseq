@@ -49,13 +49,10 @@ library(edgeR)
 # dataset gse95077 contem 3 amostras de BM e 3 de JJ
 design <- rep(c("BM","JJ"), each = 3)
 #cria objeto edgeR
-y.dge <- DGEList(counts = gse95077, group = design)
+y <- DGEList(counts = gse95077, group = design)
 
-
-group <- factor(c("Control", "Control", "Treatment", "Treatment"))
-y <- DGEList(counts=counts, group=group)
 ```
-
+<!--
 ```{r}
 y.dge <- calcNormFactors(y.dge, method="TMM")
 y.dge <- estimateDisp(y.dge)
@@ -64,13 +61,13 @@ y.et <- exactTest(y.dge)
 y.tp <- topTags(y.et, n = 100000)
 y.pvalues <- y.et$table$PValue
 ```
-
+-->
 ### Filtragem de Baixa Expressão
 
 - Remover genes com baixa contagem para reduzir o ruído.
 
-```r
-keep <- filterByExpr(y)
+```{r}
+keep <- filterByExpr(y) # TRUE ou FALSE
 y <- y[keep, , keep.lib.sizes=FALSE]
 ```
 
