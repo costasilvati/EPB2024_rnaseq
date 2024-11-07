@@ -1,5 +1,6 @@
 ---
 title: EPB2024 -- Escola Paranaense de Bioinformática
+author: "Juliana Costa-Silva"
 output:
   html_document: default
   pdf_document: 
@@ -19,7 +20,7 @@ de 6 a 8 de novembro de 2024. Me. Juliana Costa Silva conduziu um mini-curso sob
 
 - [Como utilizar o *consexpressionR*][A]
 - [Guia de instalações][B]
-
+- [Análise de Expressão com edgeR][C]
 Este minicurso demonstra a utilização do pacote 
 [consexpressionR](https://github.com/costasilvati/consexpressionR/). 
 Estas análises utilizam um conjunto de dados disponível no acesso
@@ -32,6 +33,7 @@ Estas análises utilizam um conjunto de dados disponível no acesso
 -->
 [A]: vignettes/a_talk.html
 [B]: vignettes/b_install.html
+[C]: vignettes/c_edger.html
 <!-- 
 [B]: articles/b_course_part_1.html
 [C]: articles/c_course_part_2.html

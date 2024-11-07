@@ -1,5 +1,6 @@
 ---
 title: "Como utilizar o consexpressionR - comandos R"
+author: "Juliana Costa-Silva"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A. How Bioconductor Advances Science}
