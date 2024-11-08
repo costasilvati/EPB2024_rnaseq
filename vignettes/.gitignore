@@ -1,1 +1,12 @@
 *.R
+*.csv
+*.RData
+*.log
+*.reads
+*.tab
+*.array
+*.lowinf
+*.BAM
+*.vcf
+*.summary
+*.files

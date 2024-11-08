@@ -40,11 +40,16 @@ library(edgeR)
 - **Leitura dos dados**: Importar os dados de contagem de RNA-Seq.
 - **Criação do objeto DGEList**: Este objeto armazena as contagens de genes e as informações de grupo.
 
-```{r, include = FALSE}
+```{r}
 library(consexpressionR)
 library(edgeR)
 # Para arquivos de texto
-# counts <- read.table("counts.txt", header=TRUE, row.names=1)
+counts <- read.table("GSE95077_filtered.csv", 
+                     header=TRUE,
+                     sep = ",",
+                     row.names=1)
+
+
 
 # dataset gse95077 contem 3 amostras de BM e 3 de JJ
 design <- rep(c("BM","JJ"), each = 3)
@@ -67,7 +72,7 @@ y <- DGEList(counts = gse95077, group = design)
 - Remover genes com baixa contagem para reduzir o ruído.
 
 ```{r}
-keep <- filterByExpr(y) # TRUE ou FALSE
+keep <- filterBy(y) # TRUE ou FALSE
 y <- y[keep, , keep.lib.sizes=FALSE]
 ```
 
@@ -159,7 +164,7 @@ et <- exactTest(y)
 - Extrair os resultados e visualizar os genes diferencialmente expressos.
 
 ```{r}
-topTags(et)
+guardar <- topTags(et)
 ```
 
 ## Parâmetros Utilizados
